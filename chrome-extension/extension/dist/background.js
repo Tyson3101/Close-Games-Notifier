@@ -1,5 +1,6 @@
 chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.sync.set({
+        applicationIsOn: true,
         desktopNotifications: true,
         discordWebhooks: [],
         popupNotifications: true,
@@ -8,6 +9,8 @@ chrome.runtime.onInstalled.addListener(() => {
 const NBA_API_URL = "https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json";
 const CloseGames = {};
 setInterval(() => {
+    chrome.tabs.query({});
+    console.log("done");
     CheckCloseGames();
 }, 29 * 1000);
 async function CheckCloseGames() {
@@ -33,13 +36,17 @@ async function CheckCloseGames() {
     }
 }
 function Notify(game) {
-    const homeTeam = game.homeTeam;
-    const awayTeam = game.awayTeam;
-    const message = `CLOSE GAME ALERT!
-  ${homeTeam.score} | ${homeTeam.teamCity} ${homeTeam.teamName} 
-  ${awayTeam.score} | ${awayTeam.teamCity} ${awayTeam.teamName} 
-  ${game.gameClock} ${GamePeriod(game)}`;
-    console.log(message);
+    chrome.storage.sync.get(["desktopNotifications", "discordWebhooks", "popupNotifications"], (result) => {
+        if (result.desktopNotifications) {
+            NotifyDesktopNotification(game);
+        }
+        if (result.popupNotifications) {
+            NotifyPopupNotification(game);
+        }
+        if (result.discordWebhooks.length > 0) {
+            NotifyDiscordWebhooks(game, result.discordWebhooks);
+        }
+    });
 }
 function CheckToNotify(lastInterval, currentInterval) {
     const t1 = lastInterval?.time.split(":").map(Number);
@@ -84,27 +91,52 @@ function GetScoreDiff(game) {
     const difference = Math.abs(homeTeam - awayTeam);
     return difference;
 }
-function NotifyDiscordWebhook(game, webhookURL) {
+function NotifyDesktopNotification(game) {
     const homeTeam = game.homeTeam;
     const awayTeam = game.awayTeam;
-    fetch(webhookURL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            content: "CLOSE GAME ALERT!",
-            embeds: [
-                {
-                    title: `${homeTeam.score} | ${homeTeam.teamCity} ${homeTeam.teamName}\n${awayTeam.score} | ${awayTeam.teamCity} ${awayTeam.teamName}\n${game.gameClock} ${GamePeriod(game)}`,
-                    color: "FF00FF",
-                    footer: {
-                        text: "NBA Close Game Notifier",
-                    },
-                },
-            ],
-        }),
+    const message = `CLOSE GAME ALERT!
+  ${homeTeam.score} | ${homeTeam.teamCity} ${homeTeam.teamName} 
+  ${awayTeam.score} | ${awayTeam.teamCity} ${awayTeam.teamName} 
+  ${game.gameClock} ${GamePeriod(game)}`;
+    chrome.notifications.create({
+        type: "basic",
+        iconUrl: "icon.png",
+        title: "NBA Close Game Notifier",
+        message: message,
     });
+}
+function NotifyPopupNotification(game) {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+        console.log(tabs[0]);
+        await chrome.tabs.sendMessage(tabs[0]?.id, {
+            type: "popupNotification",
+            game: game,
+        });
+    });
+}
+function NotifyDiscordWebhooks(game, webhookURLs) {
+    for (let webhookURL of webhookURLs) {
+        const homeTeam = game.homeTeam;
+        const awayTeam = game.awayTeam;
+        fetch(webhookURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                content: "CLOSE GAME ALERT!",
+                embeds: [
+                    {
+                        title: `${homeTeam.score} | ${homeTeam.teamCity} ${homeTeam.teamName}\n${awayTeam.score} | ${awayTeam.teamCity} ${awayTeam.teamName}\n${game.gameClock} ${GamePeriod(game)}`,
+                        color: "FF00FF",
+                        footer: {
+                            text: "NBA Close Game Notifier",
+                        },
+                    },
+                ],
+            }),
+        });
+    }
 }
 function GamePeriod(game) {
     if (game.period > 4)
