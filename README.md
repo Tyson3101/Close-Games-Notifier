@@ -1,1 +1,1 @@
-# Close-Games-Notifier
+# Close Games Notifier

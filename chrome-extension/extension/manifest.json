@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Close Game Notifier",
+  "version": "0.0.01",
+  "permissions": ["storage", "notifications"],
+  "background": {
+    "service_worker": "./dist/background.js"
+  },
+  "host_permissions": ["https://cdn.nba.com/"],
+  "action": {
+    "default_title": "NBA Close Game Notifier",
+    "default_popup": "./popup/popup.htm",
+    "default_icon": "./img/icon.png"
+  },
+  "description": "Notifies you when an NBA game is close!"
+}
