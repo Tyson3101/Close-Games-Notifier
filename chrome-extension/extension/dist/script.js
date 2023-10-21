@@ -1,7 +1,9 @@
+// Document Elements
 const toggleBtn = document.querySelector(".toggleBtn");
 const DesktopNotifications = document.querySelector("#DesktopNotifications");
 const DiscordWebhooks = document.querySelector("#DiscordWebhooks");
 const PopupNotifications = document.querySelector("#PopupNotifications");
+// Settings Intialization
 getAllSettingsForPopup();
 function getAllSettingsForPopup() {
     chrome.storage.sync.get([
@@ -10,13 +12,13 @@ function getAllSettingsForPopup() {
         "popupNotifications",
         "applicationIsOn",
     ], function (result) {
-        console.log(result);
         DesktopNotifications.checked = result.desktopNotifications;
         DiscordWebhooks.value = result.discordWebhooks.join("\n");
         PopupNotifications.checked = result.popupNotifications;
         changeToggleButton(result.applicationIsOn);
     });
 }
+// Event Listeners
 DesktopNotifications.addEventListener("change", function () {
     chrome.storage.sync.set({ desktopNotifications: this.checked });
 });
@@ -27,15 +29,13 @@ PopupNotifications.addEventListener("change", function () {
     chrome.storage.sync.set({ popupNotifications: this.checked });
 });
 chrome.storage.onChanged.addListener((result) => {
-    if (result["applicationIsOn"]?.newValue != undefined)
+    if (result["applicationIsOn"]?.newValue !== undefined) {
         changeToggleButton(result["applicationIsOn"].newValue);
-});
-chrome.storage.local.get(["applicationIsOn"], (result) => {
-    if (result["applicationIsOn"] == null) {
-        changeToggleButton(true);
     }
-    else
-        changeToggleButton(result["applicationIsOn"]);
+});
+// Toggle Button
+chrome.storage.local.get(["applicationIsOn"], (result) => {
+    changeToggleButton(result["applicationIsOn"] !== null ? result["applicationIsOn"] : true);
 });
 toggleBtn.addEventListener("click", () => {
     chrome.storage.local.get(["applicationIsOn"], (result) => {

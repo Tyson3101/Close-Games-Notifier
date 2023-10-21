@@ -1,9 +1,12 @@
 interface Game {
   gameId: string;
+  currentInterval: Interval;
+  nextUpdate: string;
   gameCode: string;
   gameStatus: number;
   gameStatusText: string;
   period: number;
+  gamePeriod: string;
   gameClock: string;
   gameTimeUTC: string;
   gameEt: string;

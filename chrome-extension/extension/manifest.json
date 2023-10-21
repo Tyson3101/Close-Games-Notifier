@@ -12,6 +12,11 @@
       "js": ["./dist/content.js"]
     }
   ],
+  "icons": {
+    "16": "./img/icon16x16.png",
+    "48": "./img/icon48x48.png",
+    "128": "./img/icon128x128.png"
+  },
   "host_permissions": ["https://cdn.nba.com/"],
   "action": {
     "default_title": "NBA Close Game Notifier",
