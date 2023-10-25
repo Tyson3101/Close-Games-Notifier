@@ -1,5 +1,4 @@
 // Events
-
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.get(["applicationIsOn"], (result) => {
     if (result.applicationIsOn == null) {
@@ -14,10 +13,28 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.applicationIsOn) {
+    if (changes.applicationIsOn.newValue) {
+      StartExtension();
+    } else {
+      clearInterval(intervalTimeout);
+    }
+  }
+});
+
+chrome.storage.sync.get(["applicationIsOn"], (result) => {
+  if (result.applicationIsOn) {
+    StartExtension();
+  }
+});
+
 // Code
 
 const NBA_API_URL =
   "https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json";
+
+let intervalTimeout = 0;
 
 const CloseGames: {
   [key: string]: {
@@ -27,9 +44,12 @@ const CloseGames: {
   };
 } = {};
 
-setInterval(async () => {
-  if (await checkIfApplicationIsOn()) CheckCloseGames();
-}, 25 * 1000);
+function StartExtension() {
+  if (intervalTimeout) clearInterval(intervalTimeout);
+  intervalTimeout = setInterval(async () => {
+    if (await checkIfApplicationIsOn()) CheckCloseGames();
+  }, 25 * 1000);
+}
 
 async function CheckCloseGames() {
   const response = await fetch(NBA_API_URL);
