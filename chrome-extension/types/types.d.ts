@@ -1,4 +1,5 @@
 interface Game {
+  formattedTime: string;
   gameId: string;
   currentInterval: Interval;
   nextUpdate: string;

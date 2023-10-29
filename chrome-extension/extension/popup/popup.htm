@@ -37,46 +37,96 @@
         background-color: rgb(205, 119, 119);
       }
 
-      textarea {
-        width: 100%;
-        height: 40px;
-      }
-      .settings {
-        display: grid;
+      .tabs {
+        border-top: 1px solid black;
+        margin: 10px 0;
+        display: flex;
+        justify-content: center;
         gap: 10px;
       }
 
+      .tabBtn {
+        background: transparent;
+        border: none;
+        height: 3.1rem;
+        width: 10rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .tabBtn.active {
+        text-decoration: underline;
+      }
+
+      .games {
+        margin-top: 5px;
+        max-height: 250px;
+        overflow-y: scroll;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .scoreboard {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 1rem;
+        font-size: 1.1rem;
+        background: rgb(30, 165, 195);
+        display: flex;
+        width: 300px;
+        flex-direction: column;
+      }
+
+      .scoreboard .teams {
+        border-bottom: 1px solid black;
+        padding-bottom: 10px;
+        font-size: 1.3rem;
+        margin-bottom: 9px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .scoreboard .score span {
+        font-weight: bold;
+      }
+
+      .scoreboard .bottom {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .scoreboard .hidden {
+        display: none;
+      }
+
       #adChrome {
-        margin-top: 15px;
-        padding-top: 0;
+        border-top: 1px solid black;
+        margin-top: 18px;
+        padding-top: 10px;
       }
     </style>
   </head>
   <body>
     <h1>Close Game Notifer</h1>
     <p>
-      Close Game Notifer is a chrome extension that notifies you when you close
-      a game tab.
+      Close Game Notifer is a chrome extension that notifies you when you NBA
+      game is close!
     </p>
 
-    <button class="toggleBtn">Stop</button>
     <div>
-      <h2>Settings</h2>
-      <div class="settings">
-        <div>
-          <label for="DesktopNotifications">Desktop Notifications</label>
-          <input type="checkbox" id="DesktopNotifications" />
-        </div>
-        <div>
-          <label for="DiscordWebhooks">Discord Webhooks (new lines)</label>
-          <br />
-          <textarea name="DiscordWebhooks" id="DiscordWebhooks"></textarea>
-        </div>
-        <div>
-          <label for="PopupNotifications">Popup Notifications</label>
-          <input type="checkbox" id="PopupNotifications" />
-        </div>
-      </div>
+      <button class="toggleBtn">Stop</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tabBtn active" data-tab="games">Games</button>
+      <a href="settings.htm" target="_blank">
+        <button class="tabBtn" data-tab="settings">Settings</button>
+      </a>
+    </div>
+
+    <div class="games">
+      <div>Hide Scores: <input type="checkbox" id="hideScores" /></div>
     </div>
 
     <h4 id="adChrome">
@@ -130,6 +180,6 @@
       ></a>
     </div>
 
-    <script src="../dist/script.js"></script>
+    <script src="../dist/popup.js"></script>
   </body>
 </html>

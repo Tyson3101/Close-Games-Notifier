@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings</title>
+
+    <style>
+      body {
+        background-color: rgb(164, 173, 205);
+      }
+
+      header {
+        font-size: 1rem;
+      }
+
+      .settings {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 10px;
+      }
+
+      .settings label {
+        font-size: 1.5rem;
+      }
+
+      .settings input[type="checkbox"] {
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .settings textarea {
+        height: 10rem;
+        width: 100%;
+        resize: none;
+        font-size: 1.1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header><h1>Settings</h1></header>
+    <div class="settings">
+      <div>
+        <label for="DesktopNotifications">Desktop Notifications</label>
+        <input type="checkbox" id="DesktopNotifications" />
+      </div>
+      <div>
+        <label for="DiscordWebhooks">Discord Webhooks (new lines)</label>
+        <br />
+        <textarea name="DiscordWebhooks" id="DiscordWebhooks"></textarea>
+      </div>
+      <div>
+        <label for="PopupNotifications">Popup Notifications</label>
+        <input type="checkbox" id="PopupNotifications" />
+      </div>
+    </div>
+    <script src="../dist/settings.js"></script>
+  </body>
+</html>
