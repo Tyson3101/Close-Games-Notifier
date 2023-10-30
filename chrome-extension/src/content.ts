@@ -166,6 +166,7 @@ function getMutedStatus(gameId: string): Promise<boolean> {
     });
   });
 }
+
 function StorageChangeMutedStatus(gameId: string) {
   chrome.storage.sync.get(["mutedGames"], (result) => {
     const mutedGames = result.mutedGames;

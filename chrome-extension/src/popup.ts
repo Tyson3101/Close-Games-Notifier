@@ -31,9 +31,9 @@ const hideScoresCheckbox = document.querySelector(
   "#hideScores"
 ) as HTMLInputElement;
 
-getGames();
+getGamesForScoreboard();
 
-async function getGames() {
+async function getGamesForScoreboard() {
   const data = await fetch(
     "https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json"
   );
@@ -147,7 +147,6 @@ async function createScoreboardGame(game: Game) {
 function getGameMutedStatus(gameId: string): Promise<boolean> {
   return new Promise((resolve) => {
     chrome.storage.sync.get("mutedGames", (result) => {
-      console.log("result", result);
       resolve(result.mutedGames[gameId] !== undefined);
     });
   });
@@ -163,25 +162,17 @@ chrome.storage.sync.get(["hideScores"], (result) => {
 
 hideScoresCheckbox.addEventListener("change", () => {
   chrome.storage.sync.set({ hideScores: hideScoresCheckbox.checked });
-  if (hideScoresCheckbox.checked) {
+  toggleScores(hideScoresCheckbox.checked ? "add" : "remove");
+
+  function toggleScores(addOrRemove: string) {
     document.querySelectorAll("[data-homeScore]").forEach((element) => {
-      element.classList.add("hidden");
+      element.classList[addOrRemove]("hidden");
     });
     document.querySelectorAll("[data-awayScore]").forEach((element) => {
-      element.classList.add("hidden");
+      element.classList[addOrRemove]("hidden");
     });
     document.querySelectorAll("[data-hiddenScore]").forEach((element) => {
-      element.classList.remove("hidden");
-    });
-  } else {
-    document.querySelectorAll("[data-homeScore]").forEach((element) => {
-      element.classList.remove("hidden");
-    });
-    document.querySelectorAll("[data-awayScore]").forEach((element) => {
-      element.classList.remove("hidden");
-    });
-    document.querySelectorAll("[data-hiddenScore]").forEach((element) => {
-      element.classList.add("hidden");
+      element.classList[addOrRemove]("hidden");
     });
   }
 });

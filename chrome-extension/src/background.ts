@@ -8,6 +8,7 @@ chrome.runtime.onInstalled.addListener(() => {
         discordWebhooks: [],
         popupNotifications: true,
         mutedGames: {},
+        hideScores: false,
       });
     }
   });
@@ -46,15 +47,17 @@ const CloseGames: {
 
 function StartExtension() {
   if (intervalTimeout) clearInterval(intervalTimeout);
+
+  cleanUpMutedGames();
+
   intervalTimeout = setInterval(async () => {
     if (await checkIfApplicationIsOn()) CheckCloseGames();
   }, 25 * 1000);
 }
 
 async function CheckCloseGames() {
-  const response = await fetch(NBA_API_URL);
-  const data = await response.json();
-  const games = data.scoreboard.games;
+  const games = await getGames();
+  if (!games) return;
   const closeGames = games
     .filter((game: Game) => {
       return (
@@ -88,12 +91,12 @@ async function CheckCloseGames() {
   }
 }
 
+// Notifiactions
+
 function Notify(game: Game) {
   chrome.storage.sync.get(
     ["desktopNotifications", "discordWebhooks", "popupNotifications"],
     (result) => {
-      console.log("Notifying Storage", result);
-
       if (result.desktopNotifications) {
         NotifyDesktopNotification(game);
       }
@@ -132,7 +135,6 @@ function NotifyDesktopNotification(game: Game) {
 
 function NotifyPopupNotification(game: Game) {
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-    console.log("Notifying ActiveTab", tabs[0]);
     await chrome.tabs
       .sendMessage(tabs[0]?.id, {
         type: "popupNotification",
@@ -193,7 +195,6 @@ async function CheckToNotify(lastInterval: Interval, game: Game) {
   }
   if (Number(t1[0]) > 5 && Number(t2[0]) <= 5) {
     if (currentInterval.scoreDiff <= 10) return "1:30";
-    return true;
   }
   if (Number(t1[0]) > 1 && Number(t2[0]) <= 1) {
     if (currentInterval.scoreDiff <= 5) return "OT";
@@ -244,4 +245,30 @@ function GetScoreDiff(game: Game) {
   const awayTeam = game.awayTeam.score;
   const difference = Math.abs(homeTeam - awayTeam);
   return difference;
+}
+
+async function getGames(): Promise<Game[]> | null {
+  try {
+    const response = await fetch(NBA_API_URL);
+    const data = await response.json();
+    const games = data.scoreboard.games;
+    return games;
+  } catch {
+    return null;
+  }
+}
+
+async function cleanUpMutedGames() {
+  const games = await getGames();
+  if (!games) return;
+  const activeGames = games.map((game: Game) => game.gameId);
+  chrome.storage.sync.get(["mutedGames"], (result) => {
+    const mutedGames = result.mutedGames;
+    for (let gameId in mutedGames) {
+      if (!activeGames.includes(gameId)) {
+        delete mutedGames[gameId];
+      }
+    }
+    chrome.storage.sync.set({ mutedGames });
+  });
 }
