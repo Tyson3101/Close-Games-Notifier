@@ -32,23 +32,19 @@ async function getGames() {
         return (gamesContainer.innerHTML = "<h1>No Games Today</h1>");
     }
     games.forEach((game) => {
-        game.gamePeriod = game.gameStatusText.split(" ")[0];
-        game.gameClock = game.gameStatusText.split(" ")[1];
-        game.formattedTime = `${game.gamePeriod} ${game.gameClock}`;
-        if (game.gameStatusText.includes("Final") ||
-            game.gameStatusText === "Half") {
-            game.formattedTime = game.gameStatusText;
-        }
+        game.formattedTime = game.gameStatusText;
         if (game.gameStatusText.includes("pm") ||
             game.gameStatusText.includes("am")) {
             const gameTimeUTC = game.gameTimeUTC;
             const utcDate = new Date(gameTimeUTC);
             const localHours = utcDate.getHours();
             const localMinutes = utcDate.getMinutes();
-            const ampm = localHours >= 12 ? "pm" : "am";
-            const formattedTime = `${localHours % 12 || 12}:${localMinutes
+            const ampm = localHours >= 12 ? "PM" : "AM";
+            const formattedHours = (localHours % 12 || 12)
                 .toString()
-                .padStart(2, "0")} ${ampm}`;
+                .padStart(2, "0");
+            const formattedMinutes = localMinutes.toString().padStart(2, "0");
+            const formattedTime = `${formattedHours}:${formattedMinutes} ${ampm}`;
             game.formattedTime = formattedTime;
         }
         createScoreboardGame(game);

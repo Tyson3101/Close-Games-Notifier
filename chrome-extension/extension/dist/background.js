@@ -144,13 +144,17 @@ async function CheckToNotify(lastInterval, game) {
         scoreDiff: GetScoreDiff(game),
         overtime: game.period - 4,
     };
-    const t1 = lastInterval?.time.split(":").map(Number);
-    const t2 = currentInterval.time.split(":").map(Number);
+    const t1 = lastInterval?.time?.split(":").map(Number);
+    const t2 = currentInterval.time?.split(":").map(Number);
+    if (t1 === undefined || t2 === undefined)
+        return false;
     if (await checkGameMuted(game))
         return false;
     if (t1[0] === t2[0])
         return false;
     if (lastInterval?.overtime !== currentInterval.overtime)
+        return "next OT";
+    if (currentInterval.overtime > 0)
         return "next OT";
     if (Number(t1[0]) > 9 && Number(t2[0]) <= 9) {
         if (currentInterval.scoreDiff <= 10)

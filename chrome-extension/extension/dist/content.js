@@ -26,13 +26,15 @@ chrome.runtime.onMessage.addListener(async ({ type, game }, _, sendResponse) => 
       style="
         position: relative;
         font-family: Arial, Helvetica, sans-serif;
-        min-width: 500px;
+        min-width: 300px;
         color: black;
         background-color: #fff;
         border: 1px solid #ccc;
         padding: 15px 10px;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
         margin-bottom: 3px;
+        z-index: 1001;
+        font-size: 10px;
       "
     >
     <div style="display: flex;">
@@ -47,7 +49,7 @@ chrome.runtime.onMessage.addListener(async ({ type, game }, _, sendResponse) => 
           background-color: #f44336;
           color: white;
           border: none;
-          padding: 10px 20px;
+          padding: 7px 17px;
           cursor: pointer;
         "
       >
@@ -60,26 +62,26 @@ chrome.runtime.onMessage.addListener(async ({ type, game }, _, sendResponse) => 
           background-color: #808080;
           color: white;
           border: none;
-          padding: 10px 20px;
+          padding: 7px 17px;
           cursor: pointer;
         "
       >
         Mute Game
       </button>
       </button>
-      <div id="notiCloseGameBell" style="position: absolute; top: 7%; right: 65px; margin: 0; cursor: pointer; title="Mute Notifications from this Game"
+      <div id="notiCloseGameBell" style="position: absolute; top: 7%; right: 35px; margin: 0; cursor: pointer; title="Mute Notifications from this Game"
         ><img
           src="${unmutedBellImage.src}"
           alt="NotiBell"
-          width="30"
-          height="30"
+          width="22"
+          height="22"
       /></div>
       <div id="closePopupX" style="position: absolute; top: 7%; right: 2%; cursor: pointer;" margin: 0;>
           <img
             src="https://svgshare.com/i/yk5.svg"
             alt=""
-            width="30"
-            height="30"
+            width="22"
+            height="22"
           />
       </div>
       <i style="display: inline-block; margin-left: 10px;">Next update at ${game.nextUpdate}</i>
