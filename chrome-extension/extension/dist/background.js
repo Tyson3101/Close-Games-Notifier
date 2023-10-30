@@ -8,6 +8,7 @@ chrome.runtime.onInstalled.addListener(() => {
                 discordWebhooks: [],
                 popupNotifications: true,
                 mutedGames: {},
+                hideScores: false,
             });
         }
     });
@@ -34,15 +35,16 @@ const CloseGames = {};
 function StartExtension() {
     if (intervalTimeout)
         clearInterval(intervalTimeout);
+    cleanUpMutedGames();
     intervalTimeout = setInterval(async () => {
         if (await checkIfApplicationIsOn())
             CheckCloseGames();
     }, 25 * 1000);
 }
 async function CheckCloseGames() {
-    const response = await fetch(NBA_API_URL);
-    const data = await response.json();
-    const games = data.scoreboard.games;
+    const games = await getGames();
+    if (!games)
+        return;
     const closeGames = games
         .filter((game) => {
         return (GetScoreDiff(game) <= 10 &&
@@ -70,9 +72,9 @@ async function CheckCloseGames() {
         }
     }
 }
+// Notifiactions
 function Notify(game) {
     chrome.storage.sync.get(["desktopNotifications", "discordWebhooks", "popupNotifications"], (result) => {
-        console.log("Notifying Storage", result);
         if (result.desktopNotifications) {
             NotifyDesktopNotification(game);
         }
@@ -104,7 +106,6 @@ function NotifyDesktopNotification(game) {
 }
 function NotifyPopupNotification(game) {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-        console.log("Notifying ActiveTab", tabs[0]);
         await chrome.tabs
             .sendMessage(tabs[0]?.id, {
             type: "popupNotification",
@@ -163,7 +164,6 @@ async function CheckToNotify(lastInterval, game) {
     if (Number(t1[0]) > 5 && Number(t2[0]) <= 5) {
         if (currentInterval.scoreDiff <= 10)
             return "1:30";
-        return true;
     }
     if (Number(t1[0]) > 1 && Number(t2[0]) <= 1) {
         if (currentInterval.scoreDiff <= 5)
@@ -211,4 +211,30 @@ function GetScoreDiff(game) {
     const awayTeam = game.awayTeam.score;
     const difference = Math.abs(homeTeam - awayTeam);
     return difference;
+}
+async function getGames() {
+    try {
+        const response = await fetch(NBA_API_URL);
+        const data = await response.json();
+        const games = data.scoreboard.games;
+        return games;
+    }
+    catch {
+        return null;
+    }
+}
+async function cleanUpMutedGames() {
+    const games = await getGames();
+    if (!games)
+        return;
+    const activeGames = games.map((game) => game.gameId);
+    chrome.storage.sync.get(["mutedGames"], (result) => {
+        const mutedGames = result.mutedGames;
+        for (let gameId in mutedGames) {
+            if (!activeGames.includes(gameId)) {
+                delete mutedGames[gameId];
+            }
+        }
+        chrome.storage.sync.set({ mutedGames });
+    });
 }

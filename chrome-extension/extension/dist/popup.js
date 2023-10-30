@@ -23,8 +23,8 @@ function changeToggleButton(result) {
 // Show Schedule
 const gamesContainer = document.querySelector(".games");
 const hideScoresCheckbox = document.querySelector("#hideScores");
-getGames();
-async function getGames() {
+getGamesForScoreboard();
+async function getGamesForScoreboard() {
     const data = await fetch("https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json");
     const games = (await data.json()).scoreboard.games;
     console.log("games", games);
@@ -108,7 +108,6 @@ async function createScoreboardGame(game) {
 function getGameMutedStatus(gameId) {
     return new Promise((resolve) => {
         chrome.storage.sync.get("mutedGames", (result) => {
-            console.log("result", result);
             resolve(result.mutedGames[gameId] !== undefined);
         });
     });
@@ -122,26 +121,16 @@ chrome.storage.sync.get(["hideScores"], (result) => {
 });
 hideScoresCheckbox.addEventListener("change", () => {
     chrome.storage.sync.set({ hideScores: hideScoresCheckbox.checked });
-    if (hideScoresCheckbox.checked) {
+    toggleScores(hideScoresCheckbox.checked ? "add" : "remove");
+    function toggleScores(addOrRemove) {
         document.querySelectorAll("[data-homeScore]").forEach((element) => {
-            element.classList.add("hidden");
+            element.classList[addOrRemove]("hidden");
         });
         document.querySelectorAll("[data-awayScore]").forEach((element) => {
-            element.classList.add("hidden");
+            element.classList[addOrRemove]("hidden");
         });
         document.querySelectorAll("[data-hiddenScore]").forEach((element) => {
-            element.classList.remove("hidden");
-        });
-    }
-    else {
-        document.querySelectorAll("[data-homeScore]").forEach((element) => {
-            element.classList.remove("hidden");
-        });
-        document.querySelectorAll("[data-awayScore]").forEach((element) => {
-            element.classList.remove("hidden");
-        });
-        document.querySelectorAll("[data-hiddenScore]").forEach((element) => {
-            element.classList.add("hidden");
+            element.classList[addOrRemove]("hidden");
         });
     }
 });
